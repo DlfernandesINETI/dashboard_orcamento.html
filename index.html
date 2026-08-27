@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orçamento Familiar — Diogo & Dani</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --bg2: #1a1d27;
+    --bg3: #22263a;
+    --border: #2d3148;
+    --text: #e8eaf6;
+    --text2: #8b90b8;
+    --text3: #555a7a;
+    --green: #4caf82;
+    --green-bg: #0d2b1e;
+    --yellow: #f0a500;
+    --yellow-bg: #2b1f00;
+    --red: #e05555;
+    --red-bg: #2b0f0f;
+    --blue: #5b8dee;
+    --blue-bg: #0d1a35;
+    --accent: #7c6ef7;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  /* HEADER */
+  .header {
+    max-width: 900px;
+    margin: 0 auto 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .header-title { font-size: 13px; color: var(--text3); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 4px; }
+  .header-name { font-size: 26px; font-weight: 700; color: var(--text); }
+  .header-month {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent);
+    background: rgba(124,110,247,.12);
+    border: 1px solid rgba(124,110,247,.25);
+    padding: 6px 14px;
+    border-radius: 20px;
+  }
+  .update-btn {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 12px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: 'Inter', sans-serif;
+    transition: all .2s;
+  }
+  .update-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* LOADING */
+  .loading {
+    max-width: 900px;
+    margin: 60px auto;
+    text-align: center;
+    color: var(--text2);
+  }
+  .spinner {
+    width: 32px; height: 32px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* KPI CARDS */
+  .kpis {
+    max-width: 900px;
+    margin: 0 auto 28px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 12px;
+  }
+  .kpi {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 18px 20px;
+  }
+  .kpi-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 8px; }
+  .kpi-value { font-size: 24px; font-weight: 700; font-family: 'JetBrains Mono', monospace; }
+  .kpi-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .kpi.green .kpi-value { color: var(--green); }
+  .kpi.red .kpi-value { color: var(--red); }
+  .kpi.blue .kpi-value { color: var(--blue); }
+  .kpi.yellow .kpi-value { color: var(--yellow); }
+
+  /* SECTION */
+  .section {
+    max-width: 900px;
+    margin: 0 auto 20px;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .section-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-icon { font-size: 18px; }
+  .section-title { font-size: 14px; font-weight: 600; color: var(--text); }
+  .section-total {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--text2);
+  }
+
+  /* ROW */
+  .row {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 8px;
+    align-items: center;
+  }
+  .row:last-child { border-bottom: none; }
+  .row-name { font-size: 13px; color: var(--text); margin-bottom: 6px; }
+  .row-bar-wrap { position: relative; height: 6px; background: var(--bg3); border-radius: 3px; overflow: hidden; }
+  .row-bar { height: 100%; border-radius: 3px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+  .row-values {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .row-exec { font-weight: 600; font-size: 14px; }
+  .row-meta { color: var(--text3); font-size: 11px; }
+  .row-pct {
+    display: inline-block;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 10px;
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .ok .row-bar { background: var(--green); }
+  .ok .row-pct { background: var(--green-bg); color: var(--green); }
+  .warn .row-bar { background: var(--yellow); }
+  .warn .row-pct { background: var(--yellow-bg); color: var(--yellow); }
+  .over .row-bar { background: var(--red); }
+  .over .row-pct { background: var(--red-bg); color: var(--red); }
+  .empty .row-bar { background: var(--border); }
+  .empty .row-pct { background: var(--bg3); color: var(--text3); }
+
+  /* ALERTAS */
+  .alertas {
+    max-width: 900px;
+    margin: 0 auto 20px;
+  }
+  .alerta-item {
+    background: var(--red-bg);
+    border: 1px solid rgba(224,85,85,.3);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+  }
+  .alerta-nome { color: var(--text); }
+  .alerta-valor { color: var(--red); font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+  /* ERRO */
+  .erro {
+    max-width: 900px;
+    margin: 40px auto;
+    background: var(--red-bg);
+    border: 1px solid rgba(224,85,85,.3);
+    border-radius: 14px;
+    padding: 24px;
+    text-align: center;
+    color: var(--text2);
+  }
+
+  @media (max-width: 600px) {
+    .header-name { font-size: 20px; }
+    .kpi-value { font-size: 20px; }
+    .row { grid-template-columns: 1fr; }
+    .row-values { text-align: left; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">Controle Financeiro</div>
+    <div class="header-name">Diogo & Dani</div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+    <div class="header-month" id="mes-atual">— / —</div>
+    <button class="update-btn" onclick="carregarDados()">↻ Atualizar</button>
+  </div>
+</div>
+
+<div id="app">
+  <div class="loading">
+    <div class="spinner"></div>
+    <div>Carregando dados...</div>
+  </div>
+</div>
+
+<script>
+// ── CONFIGURAÇÃO ─────────────────────────────────────────────
+const SHEET_ID = '11zaPw5yZAr5tSXrhAUJHeRkWgjWBPTSQx_GZQjpaDbA';
+const ABA = 'Jul 2026';
+const API_KEY = 'AIzaSyDNnobEJTkwHLEciXhdoonMPvo0fR2lW-s';
+
+// ── MAPEAMENTO DE LINHAS DA PLANILHA ─────────────────────────
+// Baseado na estrutura vista na imagem
+const ESTRUTURA = {
+  renda: { label: 'Renda mensal', linha: 2 },
+  fixos: [
+    { label: 'UNIMED família',            linha: 5  },
+    { label: 'Plano saúde mãe Ruth',      linha: 6  },
+    { label: 'Psicóloga — Raul',          linha: 7  },
+    { label: 'SESG / Faculdade',          linha: 8  },
+    { label: 'Ligga Internet',            linha: 9  },
+    { label: 'Sanepar Água',              linha: 10 },
+    { label: 'TIM Celular',               linha: 11 },
+    { label: 'COPEL Energia',             linha: 12 },
+    { label: 'SEM PARAR Pedágio',         linha: 13 },
+    { label: 'Clube Samuara',             linha: 14 },
+    { label: 'Escola futebol Raul',       linha: 15 },
+    { label: 'Gerlania (diarista)',        linha: 16 },
+    { label: 'Danieli (salário)',          linha: 17 },
+    { label: 'Raul Fusverki',             linha: 18 },
+    { label: 'Dentista Raul',             linha: 19 },
+    { label: 'Escola meninos',            linha: 20 },
+    { label: 'Aula de Artes',             linha: 21 },
+    { label: 'Dízimo',                    linha: 22 },
+    { label: 'Ração',                     linha: 23 },
+  ],
+  subtotalFixos: { linha: 24 },
+  alimentacao: [
+    { label: 'Semana 1',  linha: 26, meta: 1200 },
+    { label: 'Semana 2',  linha: 27, meta: 700  },
+    { label: 'Semana 3',  linha: 28, meta: 700  },
+    { label: 'Semana 4',  linha: 29, meta: 700  },
+  ],
+  subtotalAlim: { linha: 30 },
+  alimentacaoFora: [
+    { label: 'Restaurantes, bares e lanches', linha: 32, meta: 600 },
+  ],
+  subtotalAlimFora: { linha: 33 },
+  transporte: [
+    { label: 'Combustível', linha: 35, meta: 1200 },
+  ],
+  subtotalTransporte: { linha: 36 },
+  saude: [
+    { label: 'Farmácias / Remédios', linha: 38, meta: 450 },
+  ],
+  subtotalSaude: { linha: 39 },
+  cartao: [
+    { label: 'Fatura cartão', linha: 41, meta: 2000 },
+  ],
+  subtotalCartao: { linha: 42 },
+  outros: [
+    { label: 'Gastos diversos', linha: 44, meta: 500 },
+  ],
+  subtotalOutros: { linha: 45 },
+  totalGeral: { linha: 46 },
+  sobra: { linha: 47 },
+};
+
+// ── BUSCAR DADOS ──────────────────────────────────────────────
+async function buscarPlanilha() {
+  const range = encodeURIComponent(`'${ABA}'!A1:F60`);
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`Erro ${resp.status}: ${resp.statusText}`);
+  const data = await resp.json();
+  return data.values || [];
+}
+
+function getVal(rows, linha, col = 2) {
+  try {
+    const row = rows[linha - 1];
+    if (!row || !row[col]) return 0;
+    const v = String(row[col]).replace(/R\$\s*/g,'').replace(/\./g,'').replace(',','.').trim();
+    return parseFloat(v) || 0;
+  } catch { return 0; }
+}
+
+function fmt(v) {
+  return 'R$ ' + Math.abs(v).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+// ── RENDER ────────────────────────────────────────────────────
+function statusClass(exec, meta) {
+  if (!meta || exec === 0) return 'empty';
+  const pct = exec / meta;
+  if (pct > 1) return 'over';
+  if (pct >= 0.85) return 'warn';
+  return 'ok';
+}
+
+function renderRow(item, exec, meta) {
+  const cls = statusClass(exec, meta);
+  const pct = meta > 0 ? Math.min(exec / meta * 100, 100) : 0;
+  const pctLabel = meta > 0 ? Math.round(exec / meta * 100) + '%' : '—';
+  return `
+    <div class="row ${cls}">
+      <div>
+        <div class="row-name">${item.label}</div>
+        <div class="row-bar-wrap">
+          <div class="row-bar" style="width:${pct}%"></div>
+        </div>
+      </div>
+      <div class="row-values">
+        <div class="row-exec">${fmt(exec)}</div>
+        <div class="row-meta">/ ${fmt(meta)}</div>
+        <div class="row-pct">${pctLabel}</div>
+      </div>
+    </div>`;
+}
+
+function renderFixoRow(item, exec, plan) {
+  const cls = exec === 0 ? 'empty' : exec > plan ? 'over' : exec >= plan * 0.85 ? 'warn' : 'ok';
+  const pct = plan > 0 ? Math.min(exec / plan * 100, 100) : 0;
+  const pctLabel = plan > 0 ? Math.round(exec / plan * 100) + '%' : '—';
+  return `
+    <div class="row ${cls}">
+      <div>
+        <div class="row-name">${item.label}</div>
+        <div class="row-bar-wrap">
+          <div class="row-bar" style="width:${pct}%"></div>
+        </div>
+      </div>
+      <div class="row-values">
+        <div class="row-exec">${fmt(exec)}</div>
+        <div class="row-meta">/ ${fmt(plan)}</div>
+        <div class="row-pct">${pctLabel}</div>
+      </div>
+    </div>`;
+}
+
+function renderSecao(icon, titulo, itens, rows, subtotalLinha) {
+  const subtotalExec = getVal(rows, subtotalLinha, 2);
+  const subtotalPlan = getVal(rows, subtotalLinha, 1);
+  const rowsHtml = itens.map(item => {
+    const exec = getVal(rows, item.linha, 2);
+    const meta = item.meta || getVal(rows, item.linha, 1);
+    return renderRow(item, exec, meta);
+  }).join('');
+  return `
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">${icon}</span>
+        <span class="section-title">${titulo}</span>
+        <span class="section-total">${fmt(subtotalExec)} / ${fmt(subtotalPlan)}</span>
+      </div>
+      ${rowsHtml}
+    </div>`;
+}
+
+function renderFixos(rows) {
+  const subtotalExec = getVal(rows, ESTRUTURA.subtotalFixos.linha, 2);
+  const subtotalPlan = getVal(rows, ESTRUTURA.subtotalFixos.linha, 1);
+  const rowsHtml = ESTRUTURA.fixos.map(item => {
+    const exec = getVal(rows, item.linha, 2);
+    const plan = getVal(rows, item.linha, 1);
+    return renderFixoRow(item, exec, plan);
+  }).join('');
+  return `
+    <div class="section">
+      <div class="section-header">
+        <span class="section-icon">🔒</span>
+        <span class="section-title">Custos Fixos</span>
+        <span class="section-total">${fmt(subtotalExec)} / ${fmt(subtotalPlan)}</span>
+      </div>
+      ${rowsHtml}
+    </div>`;
+}
+
+function renderAlertas(rows) {
+  const alertas = [];
+  const todasCats = [
+    ...ESTRUTURA.alimentacao,
+    ...ESTRUTURA.alimentacaoFora,
+    ...ESTRUTURA.transporte,
+    ...ESTRUTURA.saude,
+    ...ESTRUTURA.cartao,
+    ...ESTRUTURA.outros,
+  ];
+  todasCats.forEach(item => {
+    const exec = getVal(rows, item.linha, 2);
+    const meta = item.meta || getVal(rows, item.linha, 1);
+    if (exec > meta) alertas.push({ label: item.label, exec, meta, diff: exec - meta });
+  });
+  if (alertas.length === 0) return '';
+  return `
+    <div class="alertas">
+      <div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px">🚨 Alertas</div>
+      ${alertas.map(a => `
+        <div class="alerta-item">
+          <span class="alerta-nome">${a.label}</span>
+          <span class="alerta-valor">+${fmt(a.diff)} acima</span>
+        </div>`).join('')}
+    </div>`;
+}
+
+async function carregarDados() {
+  document.getElementById('app').innerHTML = `
+    <div class="loading">
+      <div class="spinner"></div>
+      <div>Atualizando...</div>
+    </div>`;
+
+  try {
+    const rows = await buscarPlanilha();
+
+    const renda = getVal(rows, ESTRUTURA.renda.linha, 2);
+    const totalExec = getVal(rows, ESTRUTURA.totalGeral.linha, 2);
+    const totalPlan = getVal(rows, ESTRUTURA.totalGeral.linha, 1);
+    const sobra = renda - totalExec;
+
+    document.getElementById('mes-atual').textContent = 'Julho 2026';
+
+    const kpis = `
+      <div class="kpis">
+        <div class="kpi blue">
+          <div class="kpi-label">Renda do Mês</div>
+          <div class="kpi-value">${fmt(renda)}</div>
+          <div class="kpi-sub">salário + entradas</div>
+        </div>
+        <div class="kpi ${totalExec > renda ? 'red' : 'yellow'}">
+          <div class="kpi-label">Total Gasto</div>
+          <div class="kpi-value">${fmt(totalExec)}</div>
+          <div class="kpi-sub">${Math.round(totalExec/renda*100)}% da renda</div>
+        </div>
+        <div class="kpi ${sobra >= 0 ? 'green' : 'red'}">
+          <div class="kpi-label">${sobra >= 0 ? 'Sobra' : 'Déficit'}</div>
+          <div class="kpi-value">${fmt(sobra)}</div>
+          <div class="kpi-sub">${sobra >= 0 ? 'disponível' : 'estourou'}</div>
+        </div>
+        <div class="kpi ${totalExec > totalPlan ? 'red' : 'green'}">
+          <div class="kpi-label">Orçado vs Real</div>
+          <div class="kpi-value">${Math.round(totalExec/totalPlan*100)}%</div>
+          <div class="kpi-sub">${fmt(totalPlan)} orçado</div>
+        </div>
+      </div>`;
+
+    const alertas = renderAlertas(rows);
+    const fixos = renderFixos(rows);
+    const alim = renderSecao('🛒', 'Alimentação — Mercado', ESTRUTURA.alimentacao, rows, ESTRUTURA.subtotalAlim.linha);
+    const alimFora = renderSecao('🍕', 'Alimentação Fora', ESTRUTURA.alimentacaoFora, rows, ESTRUTURA.subtotalAlimFora.linha);
+    const transporte = renderSecao('⛽', 'Transporte', ESTRUTURA.transporte, rows, ESTRUTURA.subtotalTransporte.linha);
+    const saude = renderSecao('💊', 'Saúde', ESTRUTURA.saude, rows, ESTRUTURA.subtotalSaude.linha);
+    const cartao = renderSecao('💳', 'Cartão de Crédito', ESTRUTURA.cartao, rows, ESTRUTURA.subtotalCartao.linha);
+    const outros = renderSecao('📦', 'Outros', ESTRUTURA.outros, rows, ESTRUTURA.subtotalOutros.linha);
+
+    document.getElementById('app').innerHTML = kpis + alertas + fixos + alim + alimFora + transporte + saude + cartao + outros;
+
+  } catch(e) {
+    document.getElementById('app').innerHTML = `
+      <div class="erro">
+        <div style="font-size:24px;margin-bottom:12px">⚠️</div>
+        <div style="font-weight:600;margin-bottom:8px">Erro ao carregar dados</div>
+        <div style="font-size:12px">${e.message}</div>
+        <div style="font-size:12px;margin-top:8px;color:var(--text3)">Verifique a API Key e o ID da planilha</div>
+        <button class="update-btn" onclick="carregarDados()" style="margin-top:16px">Tentar novamente</button>
+      </div>`;
+  }
+}
+
+carregarDados();
+</script>
+</body>
+</html>
