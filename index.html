@@ -234,7 +234,9 @@
 <script>
 // ── CONFIGURAÇÃO ─────────────────────────────────────────────
 const SHEET_ID = '11zaPw5yZAr5tSXrhAUJHeRkWgjWBPTSQx_GZQjpaDbA';
-const ABA = 'Jul 2026';
+const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+const agora = new Date();
+const ABA = meses[agora.getMonth()] + ' ' + agora.getFullYear();
 const API_KEY = 'AIzaSyDNnobEJTkwHLEciXhdoonMPvo0fR2lW-s';
 
 // ── MAPEAMENTO DE LINHAS DA PLANILHA ─────────────────────────
