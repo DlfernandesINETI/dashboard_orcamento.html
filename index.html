@@ -300,6 +300,10 @@ const ESTRUTURA = {
 
 // ── BUSCAR DADOS ──────────────────────────────────────────────
 async function buscarPlanilha() {
+  const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  const agora = new Date();
+  const ABA = meses[agora.getMonth()] + ' ' + agora.getFullYear();
+  
   const range = encodeURIComponent(`'${ABA}'!A1:F60`);
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${SHEET_ID}/values/${range}?key=${API_KEY}`;
   const resp = await fetch(url);
