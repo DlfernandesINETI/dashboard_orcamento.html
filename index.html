@@ -235,7 +235,7 @@
 // ── CONFIGURAÇÃO ─────────────────────────────────────────────
 const SHEET_ID = '11zaPw5yZAr5tSXrhAUJHeRkWgjWBPTSQx_GZQjpaDbA';
 const meses = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-const agora = new Date();
+const agora = new Date(new Date().toLocaleString('pt-BR', {timeZone: 'America/Sao_Paulo'}));
 const ABA = meses[agora.getMonth()] + ' ' + agora.getFullYear();
 const API_KEY = 'AIzaSyDNnobEJTkwHLEciXhdoonMPvo0fR2lW-s';
 
@@ -496,7 +496,7 @@ async function carregarDados() {
       </div>`;
   }
 }
-
+console.log('Aba calculada:', ABA);
 carregarDados();
 </script>
 </body>
